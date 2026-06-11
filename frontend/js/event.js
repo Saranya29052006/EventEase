@@ -11,6 +11,7 @@ window.onload = async () => {
   }
   await loadEvent(eventId);
 };
+
 function formatTime(time) {
   if (!time) return 'N/A';
   const [hours, minutes] = time.split(':');
@@ -19,11 +20,12 @@ function formatTime(time) {
   h = h % 12 || 12;
   return `${h}:${minutes} ${ampm}`;
 }
+
 async function loadEvent(id) {
   try {
     const res = await fetch(`${API}/events/${id}`);
     if (!res.ok) {
-      alert('This event has expired and is no longer available.');
+      // ✅ No scary alert — just redirect silently
       window.location.href = 'index.html';
       return;
     }
@@ -32,17 +34,20 @@ async function loadEvent(id) {
     renderEvent(event);
   } catch (err) {
     console.log('Error:', err);
+    window.location.href = 'index.html';
   }
 }
+
 function renderEvent(event) {
   const container = document.getElementById('eventDetail');
   container.innerHTML = `
   <div class="event-layout">
 
     <div class="event-left">
-<div class="img-wrapper">
-  <img class="banner" src="${event.image || 'https://via.placeholder.com/600x400?text=EventEase'}" alt="${event.title}"/>
-</div>      <h1 class="event-title">${event.title}</h1>
+      <div class="img-wrapper">
+        <img class="banner" src="${event.image || 'https://via.placeholder.com/600x400?text=EventEase'}" alt="${event.title}"/>
+      </div>
+      <h1 class="event-title">${event.title}</h1>
       <p class="event-desc">${event.description}</p>
     </div>
 

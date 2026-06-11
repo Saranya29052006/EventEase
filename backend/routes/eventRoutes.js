@@ -31,11 +31,11 @@ router.get('/', async (req, res) => {
 // Get single event
 router.get('/:id', async (req, res) => {
   try {
-    const event = await Event.findByIdAndUpdate(
-  req.params.id,
-  updateData,
-  { returnDocument: 'after', runValidators: true }
-);
+    const event = await Event.findById(req.params.id); // ✅ fixed
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -67,7 +67,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
       category: req.body.category,
       price: Number(req.body.price),
       totalSeats: Number(req.body.totalSeats),
-      availableSeats: Number(req.body.availableSeats),
+      availableSeats: Number(req.body.totalSeats), // ✅ use totalSeats as initial availableSeats
       image: req.file ? req.file.path : ''
     };
     const event = new Event(eventData);
@@ -79,7 +79,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   }
 });
 
-// Update event (admin only) — MUST come before delete, and is fine after GET /:id
+// Update event (admin only)
 router.put('/:id', auth, upload.single('image'), async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
