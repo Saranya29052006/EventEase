@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = 'https://eventease-backend-cgn0.onrender.com/api';
 let allEvents = [];
 
 // Load events on page load
