@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EventEase - Admin Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎟️</text></svg>">
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    .admin-container {
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .tab {
+      padding: 0.7rem 1.5rem;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      background: transparent;
+    }
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--dark2);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      border-left: 4px solid var(--primary);
+    }
+    .stat-card h3 {
+      font-size: 2rem;
+      color: var(--primary);
+    }
+    .stat-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo" onclick="window.location.href='/'" style="cursor:pointer">Event<span>Ease</span></div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/admin">Admin</a>
+      <a id="logoutLink" href="#" onclick="logout()">Logout</a>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    <h2 class="section-title">Admin Dashboard</h2>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3 id="totalEvents">0</h3>
+        <p>Total Events</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="totalBookings">0</h3>
+        <p>Total Bookings</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="totalRevenue">0</h3>
+        <p>Total Revenue (₹)</p>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('addEvent')">➕ Add Event</button>
+      <button class="tab" onclick="switchTab('manageEvents')">📋 Manage Events</button>
+      <button class="tab" onclick="switchTab('allBookings')">🎟️ All Bookings</button>
+    </div>
+
+    <!-- TAB 1 — ADD EVENT -->
+    <div class="tab-content active" id="addEvent">
+      <div style="background:var(--dark2);padding:2rem;border-radius:var(--border-radius)">
+        <h3 style="margin-bottom:1.5rem">Add New Event</h3>
+        <div id="addAlert" class="alert" style="display:none"></div>
+
+        <div class="form-group">
+          <label>Event Title</label>
+          <input type="text" id="title" placeholder="Enter event title"/>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" placeholder="Enter event description"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="date"/>
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <input type="time" id="time"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Venue</label>
+          <input type="text" id="venue" placeholder="Enter venue"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="category">
+              <option value="Concert">Concert</option>
+              <option value="Sports">Sports</option>
+              <option value="Conference">Conference</option>
+              <option value="Theatre">Theatre</option>
+              <option value="Festival">Festival</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Price (₹)</label>
+            <input type="number" id="price" placeholder="Enter price"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Total Seats</label>
+          <input type="number" id="totalSeats" placeholder="Enter total seats"/>
+        </div>
+        <div class="form-group">
+          <label>Image</label>
+          <input type="file" id="image" accept="image/*"/>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;padding:1rem" onclick="addEvent()">
+          ➕ Add Event
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2 — MANAGE EVENTS -->
+    <div class="tab-content" id="manageEvents">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Price</th>
+              <th>Seats Left</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3 — ALL BOOKINGS -->
+    <div class="tab-content" id="allBookings">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>User</th>
+              <th>Event</th>
+              <th>Tickets</th>
+              <th>Total</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+    <div style="background:#16213e;border:0.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:360px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🗑️</div>
+      <h3 style="margin-bottom:0.5rem;color:rgba(255,255,255,0.85)">Delete Event?</h3>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.9rem;margin-bottom:1.5rem">This action cannot be undone.</p>
+      <div style="display:flex;gap:1rem;justify-content:center">
+        <button style="background:transparent;border:0.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:0.6rem 1.5rem;border-radius:8px;cursor:pointer;font-size:0.9rem" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" style="padding:0.6rem 1.5rem;border-radius:8px;cursor:pointer" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT EVENT MODAL -->
+  <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;overflow-y:auto;">
+    <div style="background:#16213e;border:0.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:500px;margin:2rem auto;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <h3 style="color:rgba(255,255,255,0.85)">✏️ Edit Event</h3>
+        <button onclick="closeEditModal()" style="background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:1.5rem;cursor:pointer">×</button>
+      </div>
+
+      <div id="editAlert" class="alert" style="display:none;margin-bottom:1rem"></div>
+
+      <input type="hidden" id="editId"/>
+
+      <div class="form-group">
+        <label>Event Title</label>
+        <input type="text" id="editTitle"/>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="editDescription"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="editDate"/>
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" id="editTime"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Venue</label>
+        <input type="text" id="editVenue"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="editCategory">
+            <option value="Concert">Concert</option>
+            <option value="Sports">Sports</option>
+            <option value="Conference">Conference</option>
+            <option value="Theatre">Theatre</option>
+            <option value="Festival">Festival</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" id="editPrice"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Available Seats</label>
+        <input type="number" id="editAvailableSeats"/>
+      </div>
+      <div class="form-group">
+        <label>Update Image</label>
+        <input type="file" id="editImage" accept="image/*"/>
+        <p style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:0.4rem">Leave empty to keep existing image</p>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-top:1rem">
+        <button style="flex:1;background:transparent;border:0.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:0.8rem;border-radius:8px;cursor:pointer;font-size:0.9rem" onclick="closeEditModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;padding:0.8rem;border-radius:8px;cursor:pointer" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+<!-- BOOKING DETAILS MODAL -->
+  <div id="bookingDetailsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+    <div style="background:#16213e;border:0.5px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;width:520px;max-width:90%;text-align:center;">
+      <h3 style="color:rgba(255,255,255,0.85);margin-bottom:1.2rem">Booking Details</h3>
+
+      <div id="bookingDetailsContent" style="text-align:left;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;padding:0.8rem;border-radius:8px;cursor:pointer" onclick="closeBookingDetailsModal()">Close</button>
+    </div>
+  </div>
+  <footer>
+    <p>Made with <span>♥</span> by EventEase &copy; 2026</p>
+  </footer>
+
+  <script src="/static/js/auth.js"></script>
+<script src="/static/js/admin.js"></script>
+</body>
+</html>
