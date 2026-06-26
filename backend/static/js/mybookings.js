@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = 'https://eventease-6yh5.onrender.com/api';
 let allBookings = [];
 
 function formatTime(time) {
